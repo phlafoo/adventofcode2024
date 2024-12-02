@@ -1,0 +1,5 @@
+** PC specs: AMD Ryzen 7 7800X3D, 32 GB RAM @ 6000 MT/S **
+
+day_01_bench                fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1                    25.19 µs      │ 47.19 µs      │ 25.29 µs      │ 25.88 µs      │ 100     │ 100
+╰─ part2                    22.19 µs      │ 45.79 µs      │ 24.39 µs      │ 24.79 µs      │ 100     │ 100

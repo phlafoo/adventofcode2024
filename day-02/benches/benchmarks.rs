@@ -14,3 +14,8 @@ fn part1() {
 fn part2() {
     part2::process(divan::black_box(include_str!("../input1.txt",))).unwrap();
 }
+
+#[divan::bench]
+fn part2_recursive() {
+    part2_recursive::process(divan::black_box(include_str!("../input1.txt",))).unwrap();
+}

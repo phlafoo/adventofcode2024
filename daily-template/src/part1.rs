@@ -1,6 +1,6 @@
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
-    todo!("day 01 - part 1");
+    todo!("part 1");
 }
 
 #[cfg(test)]

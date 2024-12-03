@@ -16,7 +16,7 @@ fn part1() {
 #[divan::bench]
 fn part2() {
     part2::process(divan::black_box(include_str!(
-        "../input2.txt",
+        "../input1.txt",
     )))
     .unwrap();
 }

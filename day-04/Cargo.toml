@@ -1,5 +1,5 @@
 [package]
-name = "day-01"
+name = "day-04"
 version = "0.1.0"
 edition = "2021"
 
@@ -19,6 +19,6 @@ rstest.workspace = true
 # test-log.workspace = true
 
 [[bench]]
-name = "day-01-bench"
+name = "day-04-bench"
 path = "benches/benchmarks.rs"
 harness = false

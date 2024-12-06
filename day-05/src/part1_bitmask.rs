@@ -24,16 +24,16 @@ pub fn process(input: &str) -> miette::Result<String> {
     // Iterate updates
     'outer: for line in lines {
         // Collect page numbers in this update
-        let mut update = vec![];
-        let mut i = 0;
-        while i < line.len() {
-            update.push(line[i..i + 2].parse::<usize>().unwrap());
-            i += 3
-        }
+        let update = line
+            .as_bytes()
+            .chunks(3)
+            .map(parse_usize)
+            .collect::<Vec<_>>();
 
         // The expected index of each number can be calculated by counting how many times the number
-        // appears in all the rules associated with this update.
-        for (i, p0) in update.iter().enumerate() {
+        // appears in all the rules associated with this update. An incorrect update will have at
+        // least 2 numbers in the wrong position, so the first number in the update can be skipped.
+        for (i, p0) in update.iter().enumerate().skip(1) {
             let mut count = 0;
             for p1 in update.iter() {
                 count += ((rules[*p1] >> p0) & 1) as usize;
@@ -50,6 +50,12 @@ pub fn process(input: &str) -> miette::Result<String> {
     Ok(result.to_string())
 }
 // 6384
+
+/// Parses the first 2 bytes of a byte slice into a usize. Panics if < 2 bytes in slice.
+#[inline(always)]
+fn parse_usize(bytes: &[u8]) -> usize {
+    ((bytes[0] - b'0') * 10 + bytes[1] - b'0') as usize
+}
 
 #[cfg(test)]
 mod tests {

@@ -22,8 +22,24 @@ fn part1_optimized() {
 }
 
 #[divan::bench]
+fn part1_bitmask() {
+    part1_bitmask::process(divan::black_box(include_str!(
+        "../input1.txt",
+    )))
+    .unwrap();
+}
+
+#[divan::bench]
 fn part2() {
     part2::process(divan::black_box(include_str!(
+        "../input1.txt",
+    )))
+    .unwrap();
+}
+
+#[divan::bench]
+fn part2_bitmask() {
+    part2_bitmask::process(divan::black_box(include_str!(
         "../input1.txt",
     )))
     .unwrap();

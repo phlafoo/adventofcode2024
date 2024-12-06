@@ -8,7 +8,7 @@ pub fn process(input: &str) -> miette::Result<String> {
 
     // Indexed by the "before" numbers, each element is bitmask representing all the numbers that must go after.
     let mut rules = vec![0_u128; 100];
-    let mut lines = input.lines();
+    let mut lines = input.lines().map(str::as_bytes);
 
     // Get all the rules
     loop {
@@ -16,19 +16,15 @@ pub fn process(input: &str) -> miette::Result<String> {
         if line.is_empty() {
             break;
         }
-        let a = line[..2].parse::<usize>().unwrap();
-        let b = line[3..5].parse::<u128>().unwrap();
-        rules[a] |= 1 << b; // Set corresponding bit
+        let a = parse_u32(line);
+        let b = parse_u32(&line[3..5]);
+        rules[a as usize] |= 1 << b; // Set corresponding bit
     }
 
     // Iterate updates
     'outer: for line in lines {
         // Collect page numbers in this update
-        let update = line
-            .as_bytes()
-            .chunks(3)
-            .map(parse_usize)
-            .collect::<Vec<_>>();
+        let update = line.chunks(3).map(parse_u32).collect::<Vec<_>>();
 
         // The expected index of each number can be calculated by counting how many times the number
         // appears in all the rules associated with this update. An incorrect update will have at
@@ -36,9 +32,9 @@ pub fn process(input: &str) -> miette::Result<String> {
         for (i, p0) in update.iter().enumerate().skip(1) {
             let mut count = 0;
             for p1 in update.iter() {
-                count += ((rules[*p1] >> p0) & 1) as usize;
+                count += ((rules[*p1 as usize] >> p0) & 1) as u32;
             }
-            if i != count {
+            if i as u32 != count {
                 // Expected index does not match actual index, so this update is incorrect
                 continue 'outer;
             }
@@ -51,10 +47,10 @@ pub fn process(input: &str) -> miette::Result<String> {
 }
 // 6384
 
-/// Parses the first 2 bytes of a byte slice into a usize. Panics if < 2 bytes in slice.
+/// Parses the first 2 bytes of a byte slice into a u32. Panics if < 2 bytes in slice.
 #[inline(always)]
-fn parse_usize(bytes: &[u8]) -> usize {
-    ((bytes[0] - b'0') * 10 + bytes[1] - b'0') as usize
+fn parse_u32(bytes: &[u8]) -> u32 {
+    ((bytes[0] - b'0') * 10 + bytes[1] - b'0') as u32
 }
 
 #[cfg(test)]

@@ -52,7 +52,6 @@ fn get_error_index(report: &[i32], step: usize, (l0, l1): (usize, usize)) -> Opt
     let len = report.len();
     (l1 + step..len - 1).find(|&i| !range.contains(&(report[i] - report[i + 1])))
 }
-// 290
 
 #[cfg(test)]
 mod tests {

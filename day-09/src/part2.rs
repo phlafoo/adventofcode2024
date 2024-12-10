@@ -9,10 +9,8 @@ pub fn process(input: &str) -> miette::Result<String> {
     let mut pos = 0; // Index of the rearranged list of IDs
     let mut left = 0; // Left index
 
-    let calculate_step = |id, count, pos| -> usize {
-        (id * count * (count + 2 * pos - 1)) / 2
-    };
-    
+    let calculate_step = |id, count, pos| -> usize { (id * count * (count + 2 * pos - 1)) / 2 };
+
     // Indexed by file size. Indicates where in the input the leftmost file was for a given size.
     let mut cache = [input.len() - 1; 10];
     let update_cache = |cache: &mut [usize; 10], i, val| {
@@ -52,7 +50,7 @@ pub fn process(input: &str) -> miette::Result<String> {
             // If it fits it sits
             if right_size <= hole {
                 update_cache(&mut cache, hole, right);
-                
+
                 result += calculate_step(right_id, right_size, pos);
                 pos += right_size;
 

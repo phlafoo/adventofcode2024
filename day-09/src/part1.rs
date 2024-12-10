@@ -69,9 +69,7 @@ pub fn process(input: &str) -> miette::Result<String> {
     let mut pos = 0;
     let mut remaining = parse_u8(input[right]); // How many ids are remaining from the right side
 
-    let calculate_step = |id, count, pos| -> usize {
-        (id * count * (count + 2 * pos - 1)) / 2
-    };
+    let calculate_step = |id, count, pos| -> usize { (id * count * (count + 2 * pos - 1)) / 2 };
 
     'outer: loop {
         if right <= left {

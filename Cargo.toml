@@ -17,6 +17,7 @@ divan = "0.1.16"
 miette = { version = "7.4", features = ["fancy"] }
 regex = "1.11.1"
 fxhash = "0.2.1"
+rand = "0.8.*"
 # nom_locate = "4.2.0"
 # nom-supreme = "0.8.0"
 # test-log = { version = "0.2.13", default-features = false, features = [

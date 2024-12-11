@@ -37,3 +37,11 @@ day_09_bench                fastest       │ slowest       │ median        �
 day_10_bench                fastest       │ slowest       │ median        │ mean          │ samples │ iters
 ├─ part1                    16.39 µs      │ 52.59 µs      │ 16.59 µs      │ 17.45 µs      │ 100     │ 100
 ╰─ part2                    15.59 µs      │ 54.19 µs      │ 15.89 µs      │ 19.06 µs      │ 100     │ 100
+
+day_07_bench                fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1_naive              1.325 ms      │ 1.722 ms      │ 1.349 ms      │ 1.37 ms       │ 100     │ 100
+├─ part1_iterative          527.4 µs      │ 795.5 µs      │ 542.4 µs      │ 551.8 µs      │ 100     │ 100
+├─ part1_recursive          461.3 µs      │ 794.3 µs      │ 475.9 µs      │ 489 µs        │ 100     │ 100
+├─ part1_smart              114.7 µs      │ 228.5 µs      │ 124 µs        │ 133.4 µs      │ 100     │ 100
+├─ part2                    21.95 ms      │ 24.06 ms      │ 22.02 ms      │ 22.33 ms      │ 100     │ 100
+╰─ part2_smart              139 µs        │ 268.9 µs      │ 144.4 µs      │ 162.5 µs      │ 100     │ 100

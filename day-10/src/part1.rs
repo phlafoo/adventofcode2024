@@ -33,7 +33,7 @@ pub fn process(input: &str) -> miette::Result<String> {
                     continue;
                 }
                 let n = n as usize;
-                if visited[n] || n >= input.len() {
+                if n >= input.len() || visited[n] {
                     continue;
                 }
                 if input[n] == input[s] - 1 {

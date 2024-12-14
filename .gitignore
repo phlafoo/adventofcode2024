@@ -1,4 +1,4 @@
 /target
 /benchmark-results
 /day-*/input*.txt
-scratch.txt
+scratch*

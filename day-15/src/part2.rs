@@ -21,6 +21,7 @@ unsafe fn inner(input: &[u8]) -> usize {
     // let height = input.iter().position(|b| b == &b'\n').unwrap();
     // let width = height * 2;
 
+    // Robot index
     let mut rob = 0;
 
     let north = -(WIDTH as i32);

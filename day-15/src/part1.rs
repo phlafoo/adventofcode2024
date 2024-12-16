@@ -14,6 +14,8 @@ unsafe fn inner(input: &[u8]) -> usize {
     const DIM: usize = 50 + 1;
     
     // let dim = input.iter().position(|b| b == &b'\n').unwrap() + 1;
+
+    // Robot index
     let mut rob = input.iter().position(|b| b == &ROBOT).unwrap() as i32;
 
     let north = -(DIM as i32);

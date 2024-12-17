@@ -26,6 +26,8 @@ day_05_bench                fastest       │ slowest       │ median        �
 ├─ part2                    78.99 µs      │ 116.5 µs      │ 90.49 µs      │ 90.49 µs      │ 100     │ 100
 ╰─ part2_bitmask            55.69 µs      │ 127.6 µs      │ 55.89 µs      │ 59.48 µs      │ 100     │ 100
 
+---
+
 day_06_bench                fastest       │ slowest       │ median        │ mean          │ samples │ iters
 ├─ part1                    5.799 µs      │ 18.09 µs      │ 5.999 µs      │ 6.132 µs      │ 100     │ 100
 ╰─ part2                    1.973 ms      │ 2.565 ms      │ 1.997 ms      │ 2.02 ms       │ 100     │ 100
@@ -50,7 +52,7 @@ day_10_bench                fastest       │ slowest       │ median        �
 ├─ part1                    16.39 µs      │ 52.59 µs      │ 16.59 µs      │ 17.45 µs      │ 100     │ 100
 ╰─ part2                    15.59 µs      │ 54.19 µs      │ 15.89 µs      │ 19.06 µs      │ 100     │ 100
 
-
+---
 
 // Massive lookup table makes first run slow
 day_11_bench                fastest       │ slowest       │ median        │ mean          │ samples │ iters
@@ -73,3 +75,8 @@ day_14_bench                fastest       │ slowest       │ median        �
 day_15_bench                fastest       │ slowest       │ median        │ mean          │ samples │ iters
 ├─ part1                    26.49 µs      │ 91.89 µs      │ 26.69 µs      │ 30.93 µs      │ 100     │ 100
 ╰─ part2                    46.99 µs      │ 154.5 µs      │ 47.59 µs      │ 56.14 µs      │ 100     │ 100
+
+---
+
+day_16_bench  fastest       │ slowest       │ median        │ mean          │ samples │ iters
+╰─ part1      549.7 µs      │ 760.3 µs      │ 552.2 µs      │ 562 µs        │ 100     │ 100

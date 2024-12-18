@@ -40,7 +40,7 @@ unsafe fn inner(input: &[u8]) -> u32 {
     open[0] = (START, EAST, 0);
     let mut open_len = 1;
 
-    let mut best_cost = u32::MAX;
+    // let mut best_cost = u32::MAX;
 
     'outer: while open_len > 0 {
         // Pop from open (should be lowest cost)

@@ -10,11 +10,11 @@ pub fn process(input: &str) -> miette::Result<String> {
 unsafe fn inner_part1(input: &[u8]) -> String {
     // Parse reg A
     let mut ptr = input.as_ptr().add(12);
-    let mut a = (*ptr - b'0') as i32;
+    let mut a = (*ptr - b'0') as u32;
     ptr = ptr.add(1);
 
     while *ptr != b'\n' {
-        a = (a * 10) + (*ptr - b'0') as i32;
+        a = (a * 10) + (*ptr - b'0') as u32;
         ptr = ptr.add(1);
     }
 
@@ -24,7 +24,7 @@ unsafe fn inner_part1(input: &[u8]) -> String {
     // Parse program
     let mut program = vec![];
     while *ptr != b'\n' {
-        program.push((*ptr.add(1) - b'0') as i32);
+        program.push((*ptr.add(1) - b'0') as u32);
         ptr = ptr.add(2);
     }
 
@@ -34,20 +34,20 @@ unsafe fn inner_part1(input: &[u8]) -> String {
 }
 
 struct Computer {
-    a: i32,
-    b: i32,
-    c: i32,
+    a: u32,
+    b: u32,
+    c: u32,
     inst_ptr: usize,
-    out: Vec<i32>,
-    program: Vec<i32>,
+    out: Vec<u32>,
+    program: Vec<u32>,
     // Allows instructions to be directly indexed by opcodes
-    instruction: [fn(&mut Self, i32); 8],
+    instruction: [fn(&mut Self, u32); 8],
     // Allows combo numbers to be indexed by their literal counterparts
-    combo: [fn(&Self) -> i32; 8],
+    combo: [fn(&Self) -> u32; 8],
 }
 
 impl Computer {
-    fn new(a: i32, program: Vec<i32>) -> Self {
+    fn new(a: u32, program: Vec<u32>) -> Self {
         Computer {
             a,
             b: 0,
@@ -90,7 +90,7 @@ impl Computer {
     }
 
     #[inline(always)]
-    fn get_combo(&self, op: i32) -> i32 {
+    fn get_combo(&self, op: u32) -> u32 {
         self.combo[op as usize](self)
     }
 
@@ -100,33 +100,33 @@ impl Computer {
     }
 
     #[inline(always)]
-    fn divide(&self, op: i32) -> i32 {
+    fn divide(&self, op: u32) -> u32 {
         self.a / (1 << self.get_combo(op))
     }
 
     //  vvv  Instructions in order of opcode  vvv  //
 
     #[inline(always)]
-    fn adv(&mut self, op: i32) {
+    fn adv(&mut self, op: u32) {
         self.a = self.divide(op);
         self.advance_inst_ptr();
     }
 
     #[inline(always)]
-    fn bxl(&mut self, op: i32) {
+    fn bxl(&mut self, op: u32) {
         self.b ^= op;
         self.advance_inst_ptr();
     }
 
     #[inline(always)]
-    fn bst(&mut self, op: i32) {
+    fn bst(&mut self, op: u32) {
         // Mod 8 => `& 7`
         self.b = self.get_combo(op) & 7;
         self.advance_inst_ptr();
     }
 
     #[inline(always)]
-    fn jnz(&mut self, op: i32) {
+    fn jnz(&mut self, op: u32) {
         match self.a {
             0 => self.advance_inst_ptr(),
             _ => self.inst_ptr = op as usize,
@@ -134,25 +134,25 @@ impl Computer {
     }
 
     #[inline(always)]
-    fn bxc(&mut self, _: i32) {
+    fn bxc(&mut self, _: u32) {
         self.b ^= self.c;
         self.advance_inst_ptr();
     }
 
     #[inline(always)]
-    fn out(&mut self, op: i32) {
+    fn out(&mut self, op: u32) {
         self.out.push(self.get_combo(op) & 7);
         self.advance_inst_ptr();
     }
 
     #[inline(always)]
-    fn bdv(&mut self, op: i32) {
+    fn bdv(&mut self, op: u32) {
         self.b = self.divide(op);
         self.advance_inst_ptr();
     }
 
     #[inline(always)]
-    fn cdv(&mut self, op: i32) {
+    fn cdv(&mut self, op: u32) {
         self.c = self.divide(op);
         self.advance_inst_ptr();
     }
@@ -161,42 +161,42 @@ impl Computer {
     //  vvv  Combo numbers  vvv  //
 
     #[inline(always)]
-    fn combo_0(&self) -> i32 {
+    fn combo_0(&self) -> u32 {
         0
     }
     
     #[inline(always)]
-    fn combo_1(&self) -> i32 {
+    fn combo_1(&self) -> u32 {
         1
     }
     
     #[inline(always)]
-    fn combo_2(&self) -> i32 {
+    fn combo_2(&self) -> u32 {
         2
     }
     
     #[inline(always)]
-    fn combo_3(&self) -> i32 {
+    fn combo_3(&self) -> u32 {
         3
     }
     
     #[inline(always)]
-    fn combo_4(&self) -> i32 {
+    fn combo_4(&self) -> u32 {
         self.a
     }
     
     #[inline(always)]
-    fn combo_5(&self) -> i32 {
+    fn combo_5(&self) -> u32 {
         self.b
     }
     
     #[inline(always)]
-    fn combo_6(&self) -> i32 {
+    fn combo_6(&self) -> u32 {
         self.c
     }
     
     #[inline(always)]
-    fn combo_7(&self) -> i32 {
+    fn combo_7(&self) -> u32 {
         panic!("Combo operand 7 invalid");
     }
 }

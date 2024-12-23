@@ -1,339 +1,103 @@
+use crate::common::*;
+
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
-    let result = unsafe { inner(input.as_bytes()) };
+    let result = inner(input.as_bytes());
     Ok(result.to_string())
 }
 // 94284
 
-const DPAD_WIDTH: i32 = 3;
-const DPAD_HEIGHT: i32 = 2;
-/*
-0,0         0
-0,1|1,0     2,
+pub const DEPTH: usize = 2;
 
-<vA<AA>>^AvAA<^A>A <v<A>>^AvA^A <vA>^A<v<A>^A>AAvA^A <v<A>A>^AAAvA<^A>A
-v<<A>>^A           <A>A         vA<^AA>A             <vAAA>^A
-<A                 ^A           >^^A                 vvvA
-029A
+fn inner(input: &[u8]) -> i64 {
+    // The next optimization would be to use a simple lookup table for all possible numpad movements.
 
-379A :::
-
-<v<A >>^A vA ^A <vA <AA >>^AA vA <^A >AA vA ^A <vA >^AA <A >A <v<A >A >^AAA vA <^A >A
-   <    A  >  A   v  <<    AA  >   ^  AA  >  A   v   AA  ^  A    <  v   AAA  >   ^  A
-
-.
-<v<A>>^AvA^A <vA<AA>>^AA vA<^A>AA vA^A              <vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-<A>A         v<<AA       >^AA     >A                vAA^A<vAAA>^A
-             <<^^A
-
-<v<A>>^AvA^A v<<A>>^AA v<A<A>>^AA vAA<^A>A          v<A>^AA <A>A v<A<A>>^AAA vA<^A>A
-<A>A         <AA       v<AA       >>^A              vAA     ^A   v<AAA       >^A
-^A           ^^<<A                                  >>A     vvvA
-379A
-
-<v<A>>^AA<vA<A>>^AAvAA<^A>A <vA>^A<A>A <vA>^A<A>A <v<A>A>^AAvA<^A>A
-<AA
-
-<<vAA>A>^AAvA<^A>AAvA^A     <vA>^A<A>A <vA>^A<A>A <<vA>A>^AAvA<^A>A
-<<vAA>^AA>A                 vA^A       vA^A       <vAA>^A
-<<^^A                       >A         >A         vvA
-456A ::::
-
-
-<<vA>A>^AAvA^A<A>A
-<vAA>A^A
-vv>A
-
-v<<A>>^A<vA<A>>^AAvAA<^A>A v<<A>>^AvA^A <vA>^Av<<A>>^AAvA<^A>A <vA>^A<A>A
-<Av<AA>>^A                 <A>A         vA<AA>^A               vA^A
-^<<A                       ^A           >vvA                   >A
-140A
-26 12 22
-
-v<<A>>^A<vA<A>>^AAvAA<^A>A <vA>^AA<<vA>^A>AvA^A
-<Av<AA>>^A                 vAA<^A>A
-^<<A                       >>^A
-169A
-
-v<<A>>^A<vA<A>>^AAvAA<^A>A
-<Av<AA>>^A
-^<<A                       ^^A >vvA>A
-170A
-
-
-<<vA>>^AAv<<A>A>^AvAA<^A>A
-<AA<vA>>^A
-^^<A
-
-
-<<vA>A>^AAAvA^A<A>A
-<vAAA>A^A
-vvv>A
-
-<vA>^A<<vA>>^AAAvA<^A>A
-vA<AAA>^A
->vvvA
-
-<<vAA>A>^AvA<^A>AAvA^A
-<<vA>^AA>A
-<^^A       vA ^^A         >vvvA
-528A
-
-340A
-
-// priority: < ^ v >
-*/
-fn inner(input: &[u8]) -> i32 {
-    // const LUT = [
-
-    // ]
-
-    let get_coords = |b: u8| -> (i32, i32) {
-        match b {
-            b'0' => (1, 0),
-            b'A' => (2, 0),
-            _ => ((b - b'0' - 1) as i32 % 3, (b - b'0' + 2) as i32 / 3),
-        }
-    };
-
-    // let (dx, dy) = (-1, 0);
-    // let r = rec(dx, dy, 0);
-    // println!("{:>2},{:>2}  ->  {r}", dx, dy);
     let mut result = 0;
+
+    // Each of the 15 possible patterns can be memoized at each depth of recursion
+    let mut memo = [[0; DEPTH - 1]; 15];
+
+    // Iterate codes
     for line in input[..input.len() - 1].split(|&b| b == b'\n') {
-        let mut num = 0;
-        let (x, y) = get_coords(line[0]);
-        let dx = x - 2;
-        let dy = y;
-        let flip_priority = x == 0;
-        let r = rec_first(dx, dy, flip_priority);
-        println!("{:>2},{:>2}  ->  {r}", dx, dy);
+        // Value of this code (leading zeros ignored)
+        let mut value = 0;
 
-        let mut total = r;
+        // Starting position (A)
+        let p0 = Vec2::new(2, 0);
 
+        // Get position of first code digit
+        let p1 = get_coords(line[0]);
+
+        // Calculate number of steps to get from 'A' to the first code digit
+        let mut total = get_shortest_seq_length(p0, p1, &mut memo);
+
+        // Calculate step counts for subsequent movements
         for p in line.windows(2) {
-            num = num * 10 + (p[0] - b'0') as i32;
-            let (x0, y0) = get_coords(p[0]);
-            let (x1, y1) = get_coords(p[1]);
-            let dx = x1 - x0;
-            let dy = y1 - y0;
-            let flip_priority = (x1 == 0 && y0 == 0) || (x0 == 0 && y1 == 0);
+            value = value * 10 + (p[0] - b'0') as i64;
 
-            let r = rec_first(dx, dy, flip_priority);
-            println!("{:>2},{:>2}  ->  {r}", dx, dy);
-            total += r;
+            let p0 = get_coords(p[0]);
+            let p1 = get_coords(p[1]);
+            total += get_shortest_seq_length(p0, p1, &mut memo);
         }
-        let complexity = total * num;
-        println!("tot: {total}, num: {num}\n");
-        result += complexity;
-        // break;
+        // Calculate complexity score
+        result += total * value
     }
-
-    // for dx in -2..3 {
-    //     for dy in -3..4 {
-    //         let r = rec(dx, dy, 0);
-    //         println!("{:>2},{:>2}  ->  {r}", dx, dy);
-    //     }
-    // }
-
-    // for x in 0..3 {
-    //     for y in 0..4 {
-    //         if x == 0 && y == 0 {
-    //             continue;
-    //         }
-    //         for tx in 0..3 {
-    //             for ty in 0..4 {
-    //                 if tx == 0 && ty == 0 {
-    //                     continue;
-    //                 }
-    //                 let dx = tx - x;
-    //                 let dy = ty - y;
-
-    //                 let r = rec(dx, dy, 0);
-    //                 println!("{:>2},{:>2}  ->  {r}", dx, dy);
-    //             }
-    //         }
-    //     }
-    // }
 
     result
 }
-/*
 
-<vA<AA>>^AvAA<^A>A
-
-0,2 = 5
-<AA>A
-0,3 = 6
-<AAA>A
-
--1, 0
-v<<A>>^A
--2,-1  2,1
-
-
-
-*/
-// priority: < ^ v >
-#[allow(clippy::comparison_chain)]
-fn rec_first(dx: i32, dy: i32, flip_priority: bool) -> i32 {
-    if dx == 0 && dy == 0 {
-        return 1;
+/// Recursive function to calculate step count
+fn rec(i: usize, depth: u32, memo: &mut [[i64; DEPTH - 1]; 15]) -> i64 {
+    if depth == DEPTH as u32 - 1 {
+        // Simply return number of steps for this subsequence if we are at max depth
+        return STEP_COUNT[i];
     }
-    // Pressing button repeatedly
-    let mut total = dy.abs() + dx.abs();
-
-    if dy > 0 {
-        if dx > 0 {
-            if flip_priority {
-                total += rec(0, -1, 0);
-                total += rec(-1, 1, 0);
-                // Return to A
-                total += rec(1, 0, 0);
-            } else {
-                total += rec(-1, 0, 0);
-                total += rec(1, -1, 0);
-                // Return to A
-                total += rec(0, 1, 0);
-            }
-        } else if dx < 0 {
-            if flip_priority {
-                total += rec(-1, 0, 0);
-                total += rec(-1, -1, 0);
-                // Return to A
-                total += rec(2, 1, 0);
-            } else {
-                total += rec(-2, -1, 0);
-                total += rec(1, 1, 0);
-                // Return to A
-                total += rec(1, 0, 0);
-            }
-        } else {
-            total += rec(-1, 0, 0);
-            // Return to A
-            total += rec(1, 0, 0);
+    // Check if we have already calculated the step count for this subsequence at this depth
+    let m = memo[i][depth as usize];
+    if m != 0 {
+        return m;
+    }
+    let mut total = 0;
+    for s in LUT[i] {
+        if s == NONE {
+            break;
         }
-    } else if dy < 0 {
-        if dx > 0 {
-            if flip_priority {
-                total += rec(0, -1, 0);
-                total += rec(-1, 0, 0);
-                // Return to A
-                total += rec(1, 1, 0);
-            } else {
-                total += rec(-1, -1, 0);
-                total += rec(1, 0, 0);
-                // Return to A
-                total += rec(0, 1, 0);
-            }
-        } else if dx < 0 {
-            if flip_priority {
-                total += rec(-1, -1, 0);
-                total += rec(-1, 0, 0);
-                // Return to A
-                total += rec(2, 1, 0);
-            } else {
-                total += rec(-2, -1, 0);
-                total += rec(1, 0, 0);
-                // Return to A
-                total += rec(1, 1, 0);
-            }
-        } else {
-            total += rec(-1, -1, 0);
-            // Return to A
-            total += rec(1, 1, 0);
-        }
-    } else if dx > 0 {
-        total += rec(0, -1, 0);
-        // Return to A
-        total += rec(0, 1, 0);
-    } else if dx < 0 {
-        total += rec(-2, -1, 0);
-        // total += rec(0, -1, depth + 1, false);
-        // total += rec(-2, 0, depth + 1, false);
-
-        // Return to A
-        total += rec(2, 1, 0);
+        total += rec(s, depth + 1, memo);
     }
-    total + 1
-}
-
-#[allow(clippy::comparison_chain)]
-fn rec(dx: i32, dy: i32, depth: i32) -> i32 {
-    if depth == 1 {
-        return dx.abs() + dy.abs();
-    }
-    // let last = 1; //(depth == 1) as i32;
-    if dx == 0 && dy == 0 {
-        return 1;
-    }
-    // Pressing button repeatedly
-    let mut total = dy.abs() + dx.abs();
-
-    if dy > 0 {
-        if dx > 0 {
-            total += rec(-1, 0, depth + 1);
-            total += rec(1, -1, depth + 1);
-            // Return to A
-            total += rec(0, 1, depth + 1);
-        } else if dx < 0 {
-            total += rec(-2, -1, depth + 1);
-            total += rec(1, 1, depth + 1);
-            // Return to A
-            total += rec(1, 0, depth + 1);
-        } else {
-            total += rec(-1, 0, depth + 1);
-            // Return to A
-            total += rec(1, 0, depth + 1);
-        }
-    } else if dy < 0 {
-        if dx > 0 {
-            total += rec(-1, -1, depth + 1);
-            total += rec(1, 0, depth + 1);
-            // Return to A
-            total += rec(0, 1, depth + 1);
-        } else if dx < 0 {
-            total += rec(-2, -1, depth + 1);
-            total += rec(1, 0, depth + 1);
-            // Return to A
-            total += rec(1, 1, depth + 1);
-        } else {
-            total += rec(-1, -1, depth + 1);
-            // Return to A
-            total += rec(1, 1, depth + 1);
-        }
-    } else if dx > 0 {
-        total += rec(0, -1, depth + 1);
-        // Return to A
-        total += rec(0, 1, depth + 1);
-    } else if dx < 0 {
-        total += rec(-2, -1, depth + 1);
-        // total += rec(0, -1, depth + 1);
-        // total += rec(-2, 0, depth + 1);
-
-        // Return to A
-        total += rec(2, 1, depth + 1);
-    }
+    memo[i][depth as usize] = total;
     total
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    // 379A
-    #[test]
-    fn test_process() -> miette::Result<()> {
-        let input = "\
-029A
-980A
-179A
-456A
-379A
-";
-        //         let input = "\
-        // 456A
-        // ";
-        assert_eq!("126384", process(input)?);
-        Ok(())
+fn get_shortest_seq_length(p0: Vec2, p1: Vec2, memo: &mut [[i64; DEPTH - 1]; 15]) -> i64 {
+    // Move priority: < ^ v >
+
+    if p0 == p1 {
+        return 1;
     }
+    // Delta
+    let d = p1 - p0;
+
+    // Flip priority if the optimal sequence would pass over empty button (bottom left)
+    let flip_priority = (p1.x == 0 && p0.y == 0) || (p0.x == 0 && p1.y == 0);
+
+    // The calculations further down assume that 'A' is pressed one time, so this equation adds the
+    // remaining 'A' button presses if there are any.
+    let mut total = d.x.abs().max(1) + d.y.abs().max(1) - 2;
+
+    // Get sequence of moves for the robot that controls the first robot at the numpad (first robot
+    // with a d-pad)
+    let sequence = get_move_sequence(d, flip_priority);
+
+    // Execute first move
+    total += rec(sequence.first, 0, memo);
+
+    // Execute second move if it exists
+    if let Some(second_move) = sequence.second {
+        total += rec(second_move, 0, memo);
+    }
+
+    // Return to A
+    total += rec(sequence.return_to_a, 0, memo);
+
+    total
 }
